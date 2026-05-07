@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ ad.title }}</h2>
+        <p>Категория: {{ ad.category.name }} | Автор: {{ ad.author.email }} | {{ ad.created_at|date:"d.m.Y" }}</p>
+    </div>
+    <div class="card-body">
+        {{ ad.text|safe }}
+    </div>
+</div>
+
+<hr>
+<h4>Оставить отклик</h4>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'response_create' ad.pk %}">
+        {% csrf_token %}
+        <textarea name="text" rows="4" class="form-control mb-2" placeholder="Ваш отклик..."></textarea>
+        <button type="submit" class="btn btn-success">Отправить</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'account_login' %}">Войдите</a>, чтобы оставить отклик.</p>
+{% endif %}
+
+<h4 class="mt-4">Отклики:</h4>
+{% for response in ad.responses.all %}
+    <div class="border p-2 mb-2">
+        <strong>{{ response.author.email }}</strong> написал(а):<br>
+        {{ response.text }}<br>
+        <small class="text-muted">{{ response.created_at|date:"d.m.Y H:i" }}</small>
+        {% if response.is_accepted %}
+            <span class="badge bg-success">Принят</span>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>Пока нет откликов.</p>
+{% endfor %}
+{% endblock %}

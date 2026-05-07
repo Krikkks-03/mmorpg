@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Отклики на мои объявления</h2>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <select name="ad_id" class="form-select">
+            <option value="">Все объявления</option>
+            {% for ad in my_ads %}
+                <option value="{{ ad.pk }}" {% if request.GET.ad_id == ad.pk|stringformat:"s" %}selected{% endif %}>{{ ad.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Фильтр</button>
+    </div>
+</form>
+
+{% for response in response_list %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Объявление: {{ response.ad.title }}</h5>
+            <p>Автор отклика: {{ response.author.email }}</p>
+            <p>{{ response.text }}</p>
+            <p class="text-muted">{{ response.created_at|date:"d.m.Y H:i" }}</p>
+            {% if response.is_accepted %}
+                <span class="badge bg-success">Принят</span>
+            {% else %}
+                <a href="{% url 'accept_response' response.pk %}" class="btn btn-sm btn-success">Принять</a>
+                <a href="{% url 'delete_response' response.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Удалить отклик?')">Удалить</a>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p>Нет откликов.</p>
+{% endfor %}
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+    {% endif %}
+    <span>{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+    {% endif %}
+</div>
+{% endblock %}
