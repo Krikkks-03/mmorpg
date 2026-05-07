@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from ckeditor.fields import RichTextField
+from django.urls import reverse
 
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -19,3 +20,6 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('ad_detail', args=[str(self.id)])

@@ -22,12 +22,6 @@ class ResponseCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.ad = self.ad
-        # Отправляем письмо автору объявления
-        send_email_task.delay(
-            subject='Новый отклик на ваше объявление',
-            message=f'Пользователь {self.request.user.email} оставил отклик:\n{form.instance.text[:500]}',
-            recipient_list=[self.ad.author.email]
-        )
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -54,11 +48,6 @@ def accept_response(request, pk):
     response = get_object_or_404(Response, pk=pk, ad__author=request.user)
     response.is_accepted = True
     response.save()
-    send_email_task.delay(
-        subject='Ваш отклик принят!',
-        message=f'Автор объявления "{response.ad.title}" принял ваш отклик.',
-        recipient_list=[response.author.email]
-    )
     return redirect('my_responses')
 
 def delete_response(request, pk):
